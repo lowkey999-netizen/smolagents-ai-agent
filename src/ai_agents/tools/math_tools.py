@@ -39,6 +39,57 @@ ALLOWED_NODES = (
 )
 
 
+MAX_RESULT_DIGITS = 1_000
+MAX_EXPONENT = 10_000
+
+
+def _check_pow(node: ast.BinOp) -> tuple[bool, str]:
+    """Guards against computationally expensive exponentiation expressions.
+
+    Rejects power operations where the result would exceed MAX_RESULT_DIGITS digits,
+    preventing computational denial-of-service via expressions like 10**10**8.
+    """
+    base_node = node.left
+    exp_node = node.right
+
+    # Block nested power expressions like 10**10**8 entirely.
+    # ast.walk processes nodes bottom-up so inner BinOps are checked before outer ones,
+    # but the outer node's exponent is still a BinOp at inspection time.
+    if isinstance(exp_node, ast.BinOp) and isinstance(exp_node.op, ast.Pow):
+        return False, "Nested exponentiation expressions like a**b**c are not allowed."
+
+    # Only validate constant operands statically; skip dynamic expressions.
+    if not (isinstance(base_node, ast.Constant) and isinstance(exp_node, ast.Constant)):
+        return True, ""
+
+    base = base_node.value
+    exp = exp_node.value
+
+    if not (isinstance(base, (int, float)) and isinstance(exp, (int, float))):
+        return True, ""
+
+    # Reject excessively large exponents outright.
+    if abs(exp) > MAX_EXPONENT:
+        return False, (
+            f"Exponent {exp} exceeds the maximum allowed value of {MAX_EXPONENT}."
+        )
+
+    # Estimate digit count of the result to catch cases like 2**9999.
+    if base != 0 and exp > 0:
+        import math as _math
+        try:
+            estimated_digits = exp * _math.log10(abs(base))
+        except ValueError:
+            estimated_digits = 0
+        if estimated_digits > MAX_RESULT_DIGITS:
+            return False, (
+                f"Expression {base}**{exp} would produce a number with roughly "
+                f"{int(estimated_digits):,} digits, exceeding the {MAX_RESULT_DIGITS:,}-digit limit."
+            )
+
+    return True, ""
+
+
 def _validate_ast(node: ast.AST) -> tuple[bool, str]:
     """Ensures expression AST contains only safe mathematical operations."""
     for child in ast.walk(node):
@@ -50,6 +101,10 @@ def _validate_ast(node: ast.AST) -> tuple[bool, str]:
             if not isinstance(child.func, ast.Name) or child.func.id not in SAFE_MATH:
                 func_name = child.func.id if isinstance(child.func, ast.Name) else "unknown"
                 return False, f"Disallowed function call: '{func_name}'"
+        if isinstance(child, ast.BinOp) and isinstance(child.op, ast.Pow):
+            is_safe, error_msg = _check_pow(child)
+            if not is_safe:
+                return False, error_msg
     return True, ""
 
 
