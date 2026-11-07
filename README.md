@@ -1,4 +1,4 @@
-# Smolagents Multi-Model AI Agent
+# Smolagents AI Agent
 
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
 [![smolagents](https://img.shields.io/badge/smolagents-1.26%2B-ffcc00.svg)](https://github.com/huggingface/smolagents)
@@ -37,7 +37,7 @@ Developed as an enhanced, fully autonomous implementation of Unit 1 of the Huggi
 |    RTX 4050 6GB + 24GB System RAM |       |       High-Throughput Tier        |
 |  * qwen2.5-coder:7b               |       |  * qwen/qwen3.8-27b               |
 |  * magnum-12b                     |       +-----------------------------------+
-|  * qwen-coder-14b                 |                         |
+|  * qwen2.5-coder:14b              |                         |
 +-----------------+-----------------+                         |
                   |                                           |
                   +---------------------+---------------------+
@@ -67,12 +67,12 @@ Developed as an enhanced, fully autonomous implementation of Unit 1 of the Huggi
 
 ## Key Features
 
-- **Universal Model Portability**: Fully decoupled from hardcoded endpoints. Switch between offline local execution (`Ollama` + `qwen2.5-coder` or `qwen-coder-14b`) and ultra-fast cloud LPUs (`Groq` + `qwen3.8-27b`) by updating a single variable in `.env`.
+- **Universal Model Portability**: Fully decoupled from hardcoded endpoints. Switch between offline local execution (`Ollama` + `qwen2.5-coder:7b` or `qwen2.5-coder:14b`) and ultra-fast cloud LPUs (`Groq` + `qwen3.8-27b`) by updating a single variable in `.env`.
 - **AST-Sandboxed Math Calculator**: Built-in `calculate` tool leveraging Python's `ast.parse` module with strict node and identifier whitelisting to guarantee precision and eliminate arbitrary code execution vulnerabilities.
 - **World Time Awareness**: Custom `get_current_time_in_timezone` tool supporting any valid IANA timezone identifier via `pytz`.
 - **Live Information Retrieval**: Integrated `DuckDuckGoSearchTool` for real-time web lookups.
 - **Tuned Prompt Engineering**: Streamlined `prompts.yaml` (88 lines) stripped of hallucinated ghost tools, fully compliant with modern `smolagents` (v1.26+).
-- **Dual Interfaces**: Interactive terminal CLI (`uv run ai-agents`) and browser chat interface (`uv run python app.py`).
+- **Dual Interfaces**: Interactive terminal CLI (`uv run smolagents-ai-agent` or `uv run ai-agents`) and browser chat interface (`uv run python app.py`).
 - **Reproducible Environment**: Built with `uv` for fast dependency resolution and strictly locked virtual environments.
 
 ---
@@ -91,7 +91,7 @@ Developed as an enhanced, fully autonomous implementation of Unit 1 of the Huggi
 | :--------- | :----------------- | :--------------------------- | :----------------------------------------------- | :--------------------------------------------- |
 | **Ollama** | `qwen2.5-coder:7b` | 100% in 6 GB VRAM            | ~15-25s / step                                   | Fits fully into GPU memory; 100% offline       |
 | **Ollama** | `magnum-12b`       | Split: 6 GB VRAM + 24 GB RAM | ~23.69s (Single-step completion)                 | Balanced 12B reasoning offloaded to System RAM |
-| **Ollama** | `qwen-coder-14b`   | Split: 6 GB VRAM + 24 GB RAM | 37.55s (Step 1), 11.63s (Step 2) [Total: 49.18s] | Detailed multi-step code planning              |
+| **Ollama** | `qwen2.5-coder:14b` | Split: 6 GB VRAM + 24 GB RAM | 37.55s (Step 1), 11.63s (Step 2) [Total: 49.18s] | Detailed multi-step code planning              |
 | **Groq**   | `qwen/qwen3.8-27b` | Cloud LPUs                   | 0.73s (Step 1), 0.35s (Step 2) [Total: 1.08s]    | Blistering cloud inference on free tier        |
 
 ---
@@ -99,7 +99,7 @@ Developed as an enhanced, fully autonomous implementation of Unit 1 of the Huggi
 ## Directory Structure
 
 ```text
-ai-agents/
+smolagents-ai-agent/
 ├── .env.example               # Configuration template for model and API keys
 ├── app.py                     # Gradio Web UI entry point
 ├── docs/
@@ -109,8 +109,8 @@ ai-agents/
 ├── requirements.txt           # Generated dependencies for container deployment
 ├── uv.lock                    # Fully pinned lockfile
 └── src/
-    └── ai_agents/
-        ├── __init__.py        # CLI entry point (uv run ai-agents)
+    └── smolagents_ai_agent/
+        ├── __init__.py        # CLI entry point (uv run smolagents-ai-agent)
         ├── agents/
         │   ├── __init__.py    # Agent package exports
         │   └── first_agent.py # Agent factory wiring Model, Tools, and Prompts
@@ -133,8 +133,8 @@ ai-agents/
 ### 2. Clone and Install
 
 ```bash
-git clone https://github.com/lowkey999-netizen/ai-agents.git
-cd ai-agents
+git clone https://github.com/lowkey999-netizen/smolagents-ai-agent.git
+cd smolagents-ai-agent
 uv sync
 ```
 
@@ -172,7 +172,7 @@ GROQ_API_KEY=gsk_your_groq_api_key_here
 Run queries directly from the command line:
 
 ```bash
-uv run ai-agents "What is 45 * 12 + 10, and what time is it in London?"
+uv run smolagents-ai-agent "What is 45 * 12 + 10, and what time is it in London?"
 ```
 
 #### Execution Output

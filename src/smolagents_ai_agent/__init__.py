@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from ai_agents.agents import create_first_agent
+from smolagents_ai_agent.agents import create_first_agent
 
 
 def main() -> None:

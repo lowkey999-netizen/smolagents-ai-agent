@@ -4,7 +4,7 @@ import yaml
 from dotenv import load_dotenv
 from smolagents import CodeAgent, DuckDuckGoSearchTool, LiteLLMModel
 
-from ai_agents.tools import calculate, get_current_time_in_timezone
+from smolagents_ai_agent.tools import calculate, get_current_time_in_timezone
 
 # Automatically load environment variables from .env if present
 load_dotenv()
